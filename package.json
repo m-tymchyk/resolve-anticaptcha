@@ -1,0 +1,27 @@
+{
+    "name": "resolve-anticaptcha",
+    "version": "1.0.0",
+    "description": "AntiCaptcha API SDK",
+    "author": "Maksym Tymchyk <maksym.tymchyk@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/m-tymchyk/resolve-anticaptcha.git"
+    },
+    "main": "./build/index.js",
+    "types": "./build/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "axios": "0.18.0"
+    },
+    "devDependencies": {
+        "@types/node": "8.0.44",
+        "tslint": "5.7.0",
+        "typescript": "3.0.3"
+    },
+    "engines": {
+        "node": ">=6.11.4"
+    }
+}
