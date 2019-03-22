@@ -10,23 +10,44 @@ export enum TaskTypes {
     CUSTOM_CAPTCHA = 'CustomCaptchaTask'
 }
 
+export enum NumericOption {
+    NoDemand = 0,
+
+    // only numeric
+    OnlyNumeric = 1,
+
+    // any symbol but not numeric
+    NoNumeric = 2,
+}
+
+
 export type IError = {
     errorId: number;
     errorCode: string;
     errorDescription: string;
 }
 
+
 export type ICreateTaskResponse = IError & {
     taskId: number;
 }
+
 
 export type IGetBalanceResponse = IError & {
     balance: number;
 }
 
+
 export type IGRecaptchaSolution = {
     gRecaptchaResponse: string;
 };
+
+
+export type IImageToTextSolution = {
+    text: string;
+    url: string;
+};
+
 
 export type IGetTaskResultResponse<S = any> = IError & {
     status: 'ready' | 'processing';
@@ -59,3 +80,13 @@ export type ICommonTaskOptions = {
     lang?: 'en' | 'rn';
     callbackUrl?: string;
 }
+
+export type IImageToTextOptions = {
+    phrase?: boolean;
+    case?: boolean;
+    numeric?: NumericOption;
+    math?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    comment?: string;
+};

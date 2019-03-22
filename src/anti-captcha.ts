@@ -5,10 +5,12 @@ import {
     ICreateTaskResponse,
     IGetBalanceResponse,
     IProxyOptions,
+    IImageToTextOptions,
     IGetTaskResultResponse,
     ICommonTask,
     ICommonTaskOptions,
     IGRecaptchaSolution,
+    IImageToTextSolution,
 } from './interfaces';
 
 export default class AntiCaptcha {
@@ -117,6 +119,28 @@ export default class AntiCaptcha {
         }
 
         return this.createTask(taskData, taskOptions);
+    }
+
+    /**
+     * @param {string} imgBase64 - Image Base64 string
+     * @param {IImageToTextOptions} imgToTextOptions
+     * @param {ICommonTaskOptions} taskOptions
+     */
+    public async imageTask(imgBase64: string, imgToTextOptions: IImageToTextOptions = {}, taskOptions?: ICommonTaskOptions) {
+        let taskData = {
+            type: TaskTypes.IMAGE_TO_TEXT,
+            body: imgBase64,
+            ...imgToTextOptions,
+        };
+
+        return this.createTask(taskData, taskOptions);
+    }
+
+
+    public async resolveImage(imgBase64: string, imgToTextOptions?: IImageToTextOptions, taskOptions?: ICommonTaskOptions) {
+        const taskId = await this.imageTask(imgBase64, imgToTextOptions, taskOptions);
+
+        return this.getTaskResult<IImageToTextSolution>(taskId, 10, 10000);
     }
 
 

@@ -1,5 +1,7 @@
 import AntiCaptcha from './anti-captcha';
-import { TaskTypes } from './interfaces';
+import { TaskTypes, NumericOption } from './interfaces';
 
-export { TaskTypes };
+import { getImageData } from './helper';
+
+export { getImageData, TaskTypes, NumericOption };
 export default AntiCaptcha;
