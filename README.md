@@ -4,7 +4,7 @@
   <br>
 </h1>
 
-<h4 align="center">NodeJS API SDK for [Anti Captcha](https://anti-captcha.com) service</h4>
+<h4 align="center">NodeJS API SDK for <a href="https://anti-captcha.com">Anti Captcha</a> service</h4>
 <br>
 
 
@@ -15,13 +15,12 @@
 yarn add resolve-anticaptcha
 
 # or by NPM
-npm isntall --save resolve-anticaptcha
+npm install --save resolve-anticaptcha
 ```
 
 ## Usage
 
 ```js
-
 import AntiCaptcha from 'resolve-anticaptcha';
 
 const antiCaptcha = new AntiCaptcha('<your API Key>');
