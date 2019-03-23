@@ -1,4 +1,4 @@
-import Axios, { AxiosInstance } from 'axios';
+import Axios, {AxiosInstance} from 'axios';
 import {
     TaskTypes,
     IError,
@@ -35,6 +35,13 @@ export default class AntiCaptcha {
         this.debug = debugMode;
     }
 
+    /**
+     * @return {string}
+     */
+    public getApiKey(): string {
+        return this.clientKey;
+    }
+
 
     /**
      * Wrapper to send common AntiCaptcha request.
@@ -43,12 +50,12 @@ export default class AntiCaptcha {
      * @param {object} [params={}] - Request params
      */
     public async sendRequest<T extends IError = any>(method: string, params: any = {}): Promise<T> {
-        const { data } = await this.client.request<T>({
+        const {data} = await this.client.request<T>({
             url: method,
             data: {
                 ...params,
                 clientKey: this.clientKey,
-                softId: 791,
+                softId: 907,
             },
         });
 
@@ -71,7 +78,7 @@ export default class AntiCaptcha {
      * @returns {Promise<IGetBalanceResponse>}
      */
     public async getBalance() {
-        const { balance } = await this.sendRequest<IGetBalanceResponse>('/getBalance');
+        const {balance} = await this.sendRequest<IGetBalanceResponse>('/getBalance');
 
         return balance;
     }
@@ -85,7 +92,7 @@ export default class AntiCaptcha {
      *
      * @returns {Promise<number>}
      */
-    public async createTask(task: ICommonTask, taskOptions?: ICommonTaskOptions): Promise<number> {
+    public async createTask(task: ICommonTask, taskOptions: ICommonTaskOptions = {}): Promise<number> {
         const response = await this.sendRequest<ICreateTaskResponse>('/createTask', {
             task: task,
             languagePool: taskOptions.lang || 'en',
@@ -126,7 +133,9 @@ export default class AntiCaptcha {
      * @param {IImageToTextOptions} imgToTextOptions
      * @param {ICommonTaskOptions} taskOptions
      */
-    public async imageTask(imgBase64: string, imgToTextOptions: IImageToTextOptions = {}, taskOptions?: ICommonTaskOptions) {
+    public async imageTask(imgBase64: string,
+                           imgToTextOptions: IImageToTextOptions = {},
+                           taskOptions?: ICommonTaskOptions) {
         let taskData = {
             type: TaskTypes.IMAGE_TO_TEXT,
             body: imgBase64,
@@ -187,7 +196,7 @@ export default class AntiCaptcha {
                 }
 
                 try {
-                    const response = await this.sendRequest('/getTaskResult', { taskId });
+                    const response = await this.sendRequest('/getTaskResult', {taskId});
 
                     retryCount++;
                     if (response.status === 'ready') {

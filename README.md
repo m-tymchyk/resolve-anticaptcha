@@ -23,12 +23,13 @@ npm install --save resolve-anticaptcha
 
 ### Image captcha to Text
 ```js
-import AntiCaptcha from 'resolve-anticaptcha';
+import AntiCaptcha, { getImageData } from 'resolve-anticaptcha';
 
 const antiCaptcha = new AntiCaptcha('<your API Key>');
 
+const base64ImageData = getImageData('/path/to/image.jpg');
 antiCaptcha
-    .resolveImage(AntiCaptcha.getImageData('/path/to/image.jpg'))
+    .resolveImage(base64ImageData)
     .then((response) => {
         console.log(response);
     });

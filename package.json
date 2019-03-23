@@ -1,6 +1,6 @@
 {
     "name": "resolve-anticaptcha",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "AntiCaptcha API SDK",
     "author": "Maksym Tymchyk <maksym.tymchyk@gmail.com>",
     "license": "MIT",
@@ -11,7 +11,8 @@
     "main": "./build/index.js",
     "types": "./build/index.d.ts",
     "scripts": {
-        "build": "tsc"
+        "build": "tsc",
+        "test": "mocha -t 5000 --recursive --no-warnings"
     },
     "dependencies": {
         "axios": "0.18.0",
@@ -20,7 +21,14 @@
     "devDependencies": {
         "@types/node": "8.0.44",
         "tslint": "5.7.0",
-        "typescript": "3.0.3"
+        "babel-plugin-transform-runtime": "6.23.0",
+        "babel-preset-env": "1.7.0",
+        "typescript": "3.0.3",
+        "mocha": "5.2.0",
+        "assert": "1.4.1",
+        "babel-core": "6.26.3",
+        "babel-loader": "7.1.5",
+        "babel-preset-es2015": "6.24.1"
     },
     "engines": {
         "node": ">=6.11.4"
