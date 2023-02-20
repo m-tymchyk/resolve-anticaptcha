@@ -1,4 +1,4 @@
-import Axios, {AxiosInstance} from 'axios';
+import Axios, {AxiosInstance} from "axios";
 import {
     TaskTypes,
     IError,
@@ -11,7 +11,9 @@ import {
     ICommonTaskOptions,
     IGRecaptchaSolution,
     IImageToTextSolution,
-} from './interfaces';
+    IReCaptchaV3Options
+} from "./interfaces";
+
 
 export default class AntiCaptcha {
 
@@ -28,12 +30,13 @@ export default class AntiCaptcha {
      */
     public constructor(clientKey: string, debugMode: boolean = false) {
         this.client = Axios.create({
-            baseURL: 'http://api.anti-captcha.com',
+            baseURL: "https://api.anti-captcha.com",
         });
 
         this.clientKey = clientKey;
         this.debug = debugMode;
     }
+
 
     /**
      * @return {string}
@@ -49,13 +52,15 @@ export default class AntiCaptcha {
      * @param {string} method - AntiCaptcha request method
      * @param {object} [params={}] - Request params
      */
-    public async sendRequest<T extends IError = any>(method: string, params: any = {}): Promise<T> {
-        const {data} = await this.client.request<T>({
+    public async sendRequest<T extends IError = any>(method: string,
+                                                     params: any = {}
+    ): Promise<T> {
+        const { data } = await this.client.request<T>({
             url: method,
             data: {
                 ...params,
                 clientKey: this.clientKey,
-                softId: 907,
+                softId: 791,
             },
         });
 
@@ -65,8 +70,8 @@ export default class AntiCaptcha {
 
         throw new class implements Error {
             public message: string = data.errorDescription;
-            public name: string = 'Error';
-            public stack: string = 'No stack';
+            public name: string = "Error";
+            public stack: string = "No stack";
             public data = data;
         };
     }
@@ -78,7 +83,7 @@ export default class AntiCaptcha {
      * @returns {Promise<IGetBalanceResponse>}
      */
     public async getBalance() {
-        const {balance} = await this.sendRequest<IGetBalanceResponse>('/getBalance');
+        const { balance } = await this.sendRequest<IGetBalanceResponse>("/getBalance");
 
         return balance;
     }
@@ -92,10 +97,12 @@ export default class AntiCaptcha {
      *
      * @returns {Promise<number>}
      */
-    public async createTask(task: ICommonTask, taskOptions: ICommonTaskOptions = {}): Promise<number> {
-        const response = await this.sendRequest<ICreateTaskResponse>('/createTask', {
+    public async createTask(task: ICommonTask,
+                            taskOptions: ICommonTaskOptions = {}
+    ): Promise<number> {
+        const response = await this.sendRequest<ICreateTaskResponse>("/createTask", {
             task: task,
-            languagePool: taskOptions.lang || 'en',
+            languagePool: taskOptions.lang || "en",
             callbackUrl: taskOptions.callbackUrl,
         });
 
@@ -108,17 +115,21 @@ export default class AntiCaptcha {
     /**
      * @param {string} websiteURL - The URL where the captcha is defined.
      * @param {string} websiteKey - The value of the "data-site-key" attribute.
+     * @param {boolean} isInvisible - Is invisible Google ReCaptcha.
      * @param {IProxyOptions} proxy
      * @param {ICommonTaskOptions} taskOptions
      */
-    public async noCaptchaTask(websiteURL: string,
-                               websiteKey: string,
-                               proxy?: IProxyOptions,
-                               taskOptions?: ICommonTaskOptions) {
+    public async reCaptchaV2Task(websiteURL: string,
+                                 websiteKey: string,
+                                 isInvisible: boolean = false,
+                                 proxy?: IProxyOptions,
+                                 taskOptions?: ICommonTaskOptions
+    ) {
         let taskData = {
-            type: proxy ? TaskTypes.RECAPTCHA_PROXY : TaskTypes.RECAPTCHA_PROXYLESS,
+            type: proxy ? TaskTypes.RECAPTCHA_V2_TASK : TaskTypes.RECAPTCHA_V2_TASK_PROXYLESS,
             websiteURL: websiteURL,
             websiteKey: websiteKey,
+            isInvisible: isInvisible,
         };
 
         if (proxy) {
@@ -128,6 +139,31 @@ export default class AntiCaptcha {
         return this.createTask(taskData, taskOptions);
     }
 
+
+    /**
+     * @param {string} websiteURL - The URL where the captcha is defined.
+     * @param {string} websiteKey - The value of the "data-site-key" attribute.
+     * @param {IReCaptchaV3Options} taskOptions
+     */
+    public async reCaptchaV3Task<IGRecaptchaSolution>(websiteURL: string,
+                                                      websiteKey: string,
+                                                      taskOptions?: IReCaptchaV3Options
+    ) {
+        let taskData = {
+            type: TaskTypes.RECAPTCHA_V3_TASK_PROXYLESS,
+            websiteURL: websiteURL,
+            websiteKey: websiteKey,
+
+            minScore: taskOptions.minScore,
+            pageAction: taskOptions.pageAction,
+            isEnterprise: taskOptions.isEnterprise,
+            apiDomain: taskOptions.apiDomain
+        };
+
+        return this.createTask(taskData, taskOptions);
+    }
+
+
     /**
      * @param {string} imgBase64 - Image Base64 string
      * @param {IImageToTextOptions} imgToTextOptions
@@ -135,7 +171,8 @@ export default class AntiCaptcha {
      */
     public async imageTask(imgBase64: string,
                            imgToTextOptions: IImageToTextOptions = {},
-                           taskOptions?: ICommonTaskOptions) {
+                           taskOptions?: ICommonTaskOptions
+    ) {
         let taskData = {
             type: TaskTypes.IMAGE_TO_TEXT,
             body: imgBase64,
@@ -146,10 +183,13 @@ export default class AntiCaptcha {
     }
 
 
-    public async resolveImage(imgBase64: string, imgToTextOptions?: IImageToTextOptions, taskOptions?: ICommonTaskOptions) {
+    public async resolveImage(imgBase64: string,
+                              imgToTextOptions?: IImageToTextOptions,
+                              taskOptions?: ICommonTaskOptions
+    ) {
         const taskId = await this.imageTask(imgBase64, imgToTextOptions, taskOptions);
 
-        return this.getTaskResult<IImageToTextSolution>(taskId, 10, 10000);
+        return this.getTaskResult<IImageToTextSolution>(taskId, 15, 2000);
     }
 
 
@@ -158,15 +198,44 @@ export default class AntiCaptcha {
      * @param {string} websiteKey - The value of the "data-site-key" attribute.
      * @param {IProxyOptions} proxy
      * @param {ICommonTaskOptions} taskOptions
+     *
+     * @deprecated
+     * @see AntiCaptcha.resolveRecaptchaV2()
      */
-    public async resolveNoCaptcha(websiteURL: string,
-                                  websiteKey: string,
-                                  proxy?: IProxyOptions,
-                                  taskOptions?: ICommonTaskOptions,
+    public async resolveNoCaptcha<IGRecaptchaSolution>(websiteURL: string,
+                                                       websiteKey: string,
+                                                       proxy?: IProxyOptions,
+                                                       taskOptions?: ICommonTaskOptions
     ): Promise<IGetTaskResultResponse<IGRecaptchaSolution>> {
-        const taskId = await this.noCaptchaTask(websiteURL, websiteKey, proxy, taskOptions);
+        return this.resolveRecaptchaV2<IGRecaptchaSolution>(websiteURL, websiteKey, false, proxy, taskOptions);
+    }
 
-        return this.getTaskResult<IGRecaptchaSolution>(taskId, 10, 10000);
+    /**
+     * @param websiteURL
+     * @param websiteKey
+     * @param isInvisible
+     * @param proxy
+     * @param taskOptions
+     */
+    public async resolveRecaptchaV2<IGRecaptchaSolution>(websiteURL: string,
+                                                         websiteKey: string,
+                                                         isInvisible: boolean = false,
+                                                         proxy?: IProxyOptions,
+                                                         taskOptions?: ICommonTaskOptions
+    ): Promise<IGetTaskResultResponse<IGRecaptchaSolution>> {
+        const taskId = await this.reCaptchaV2Task(websiteURL, websiteKey, isInvisible, proxy, taskOptions);
+
+        return this.getTaskResult<IGRecaptchaSolution>(taskId, 15, 2000);
+    }
+
+
+    public async resolveRecaptchaV3<IGRecaptchaSolution>(websiteURL: string,
+                                                         websiteKey: string,
+                                                         taskOptions?: IReCaptchaV3Options
+    ): Promise<IGetTaskResultResponse<IGRecaptchaSolution>> {
+        const taskId = await this.reCaptchaV3Task(websiteURL, websiteKey, taskOptions);
+
+        return this.getTaskResult<IGRecaptchaSolution>(taskId, 15, 2000);
     }
 
 
@@ -174,14 +243,15 @@ export default class AntiCaptcha {
      * Check a task to be resolved. Will try for given amount at the give time interval.
      *
      * @param {number} taskId - The task ID you want to check result.
-     * @param {number} [retry=12] - The number of time the request must be tryed if worker is busy.
-     * @param {number} [retryInterval=10000] - The amount of time before first and each try.
+     * @param {number} [retry=20] - The number of time the request must be tryed if worker is busy.
+     * @param {number} [retryInterval=1500] - The amount of time before first and each try.
      *
      * @returns {Promise<IGetTaskResultResponse>}
-     *
-     * @see createTask
      */
-    public async getTaskResult<S = any>(taskId: number, retry: number = 12, retryInterval = 10000): Promise<IGetTaskResultResponse<S>> {
+    public async getTaskResult<S = any>(taskId: number,
+                                        retry: number = 20,
+                                        retryInterval = 1500
+    ): Promise<IGetTaskResultResponse<S>> {
         let retryCount = 0;
         return new Promise((resolve, reject) => {
             const routine = setInterval(async () => {
@@ -190,16 +260,16 @@ export default class AntiCaptcha {
                 if (retryCount > retry) {
                     this.debugLog(`Task [${taskId}] - Exceeded retry count [${retry}].`);
                     clearInterval(routine);
-                    reject(new Error('Timeout error.'));
+                    reject(new Error("Timeout error."));
 
                     return;
                 }
 
                 try {
-                    const response = await this.sendRequest('/getTaskResult', {taskId});
+                    const response = await this.sendRequest("/getTaskResult", {taskId});
 
                     retryCount++;
-                    if (response.status === 'ready') {
+                    if (response.status === "ready") {
                         this.debugLog(`Task [${taskId}] - Hash found!`);
                         clearInterval(routine);
                         resolve(response);
@@ -209,9 +279,9 @@ export default class AntiCaptcha {
                 } catch (error) {
                     clearInterval(routine);
 
-                    const errorMessage = error.data && error.data.hasOwnProperty('errorDescription')
+                    const errorMessage = error.data && error.data.hasOwnProperty("errorDescription")
                         ? error.data.errorDescription
-                        : 'HTTP request to get task result failed';
+                        : "HTTP request to get task result failed";
 
                     reject(new Error(errorMessage));
 
@@ -220,6 +290,7 @@ export default class AntiCaptcha {
             }, retryInterval);
         }) as Promise<IGetTaskResultResponse<S>>;
     }
+
 
     /**
      * @param debugData

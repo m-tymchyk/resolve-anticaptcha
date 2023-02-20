@@ -7,6 +7,11 @@
 <h4 align="center">NodeJS API SDK for <a href="https://anti-captcha.com">Anti Captcha</a> service</h4>
 <br>
 
+<p align="center">
+<a href="https://badge.fury.io/js/resolve-anticaptcha"><img src="https://badge.fury.io/js/resolve-anticaptcha.svg" alt="npm version" height="18"/></a>
+<a href="https://badge.fury.io/js/resolve-anticaptcha"><img alt="npm" src="https://img.shields.io/npm/dt/resolve-anticaptcha?style=plastic"/></a>
+</p>
+<br>
 
 ## Install
 
@@ -53,14 +58,14 @@ antiCaptcha
 ```
 
 
-### Google reCAPTCHA
+### Google reCAPTCHA no Proxy
 ```js
 import AntiCaptcha from 'resolve-anticaptcha';
 
 const antiCaptcha = new AntiCaptcha('<your API Key>');
 
 antiCaptcha
-    .resolveNoCaptcha(
+    .resolveRecaptchaV2(
         'https://my-website-url.com',               // Website URL with Google Recaptcha
         '6Lc_aCMTAAAAABx7u2N0D1XnVbI_v6ZdbM6rYf16'  // Google Recaptcha Key
     )

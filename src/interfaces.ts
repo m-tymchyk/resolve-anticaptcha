@@ -1,7 +1,10 @@
 export enum TaskTypes {
     IMAGE_TO_TEXT = 'ImageToTextTask',
-    RECAPTCHA_PROXYLESS = 'NoCaptchaTaskProxyless',
-    RECAPTCHA_PROXY = 'NoCaptchaTask',
+    RECAPTCHA_PROXYLESS = 'RecaptchaV2TaskProxyless',
+    RECAPTCHA_PROXY = 'RecaptchaV2Task',
+    RECAPTCHA_V2_TASK_PROXYLESS = 'RecaptchaV2TaskProxyless',
+    RECAPTCHA_V2_TASK = 'RecaptchaV2Task',
+    RECAPTCHA_V3_TASK_PROXYLESS = 'RecaptchaV3TaskProxyless',
     FUN_CAPTCHA = 'FunCaptchaTask',
     FUN_CAPTCHA_PROXYLESS = 'FunCaptchaTaskProxyless',
     SQUARE_NET_TEXT = 'SquareNetTextTask',
@@ -9,6 +12,7 @@ export enum TaskTypes {
     GET_TEST_PROXYLESS = 'GeeTestTaskProxyless',
     CUSTOM_CAPTCHA = 'CustomCaptchaTask'
 }
+
 
 export enum NumericOption {
     NoDemand = 0,
@@ -28,60 +32,74 @@ export type IError = {
 }
 
 
-export type ICreateTaskResponse = IError & {
+export interface ICreateTaskResponse extends IError {
     taskId: number;
 }
 
 
-export type IGetBalanceResponse = IError & {
+export interface IGetBalanceResponse extends IError {
     balance: number;
 }
 
 
-export type IGRecaptchaSolution = {
+export interface IGRecaptchaSolution {
     gRecaptchaResponse: string;
-};
+}
 
 
-export type IImageToTextSolution = {
+export interface IImageToTextSolution {
     text: string;
     url: string;
-};
+}
 
 
-export type IGetTaskResultResponse<S = any> = IError & {
+export interface IGetTaskResultResponse<S = any> extends IError {
     status: 'ready' | 'processing';
     solution: S;
-    solveCount: number;
     cost: number;
     ip: string;
     createTime: number;
     endTime: number;
+    solveCount: number;
 }
 
-export type IProxyOptions = {
+
+export interface IProxyOptions {
     proxyType: 'http' | 'socks4' | 'socks5';
     proxyAddress: string;
     proxyPort: number;
-    userAgent: string;
 
     proxyLogin?: string;
     proxyPassword?: string;
-    cookies?: string;
-};
 
-export type ICommonTask = {
+    userAgent: string;
+
+    cookies?: string;
+}
+
+
+export interface ICommonTask {
     type: TaskTypes;
 
     [key: string]: any;
-};
+}
 
-export type ICommonTaskOptions = {
+
+export interface ICommonTaskOptions {
     lang?: 'en' | 'rn';
     callbackUrl?: string;
 }
 
-export type IImageToTextOptions = {
+
+export interface IReCaptchaV3Options extends ICommonTaskOptions {
+    minScore?: number;
+    pageAction?: string;
+    isEnterprise?: boolean;
+    apiDomain?: string;
+}
+
+
+export interface IImageToTextOptions {
     phrase?: boolean;
     case?: boolean;
     numeric?: NumericOption;
@@ -89,4 +107,4 @@ export type IImageToTextOptions = {
     minLength?: number;
     maxLength?: number;
     comment?: string;
-};
+}
