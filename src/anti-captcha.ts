@@ -60,7 +60,7 @@ export default class AntiCaptcha {
             data: {
                 ...params,
                 clientKey: this.clientKey,
-                softId: 791,
+                softId: 1090
             },
         });
 
