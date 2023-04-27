@@ -141,23 +141,30 @@ export default class AntiCaptcha {
 
 
     /**
-     * @param {string} websiteURL - The URL where the captcha is defined.
-     * @param {string} websiteKey - The value of the "data-site-key" attribute.
-     * @param {IReCaptchaV3Options} taskOptions
+     * @param websiteURL
+     * @param websiteKey
+     * @param minScore
+     * @param pageAction
+     * @param isEnterprise
+     * @param apiDomain
+     * @param taskOptions
      */
     public async reCaptchaV3Task<IGRecaptchaSolution>(websiteURL: string,
                                                       websiteKey: string,
-                                                      taskOptions?: IReCaptchaV3Options
+                                                      minScore: number,
+                                                      pageAction?: string,
+                                                      isEnterprise?: boolean,
+                                                      apiDomain?: string,
+                                                      taskOptions?: ICommonTaskOptions
     ) {
         let taskData = {
             type: TaskTypes.RECAPTCHA_V3_TASK_PROXYLESS,
             websiteURL: websiteURL,
             websiteKey: websiteKey,
-
-            minScore: taskOptions.minScore,
-            pageAction: taskOptions.pageAction,
-            isEnterprise: taskOptions.isEnterprise,
-            apiDomain: taskOptions.apiDomain
+            minScore: minScore,
+            pageAction: pageAction,
+            isEnterprise: isEnterprise,
+            apiDomain: taskOptions
         };
 
         return this.createTask(taskData, taskOptions);
@@ -183,6 +190,13 @@ export default class AntiCaptcha {
     }
 
 
+    /**
+     * @param {string} imgBase64
+     * @param {IImageToTextOptions} imgToTextOptions
+     * @param {ICommonTaskOptions} taskOptions
+     *
+     * @return
+     */
     public async resolveImage(imgBase64: string,
                               imgToTextOptions?: IImageToTextOptions,
                               taskOptions?: ICommonTaskOptions
@@ -196,26 +210,11 @@ export default class AntiCaptcha {
     /**
      * @param {string} websiteURL - The URL where the captcha is defined.
      * @param {string} websiteKey - The value of the "data-site-key" attribute.
+     * @param {boolean} isInvisible - Is invisible Google ReCaptcha.
      * @param {IProxyOptions} proxy
      * @param {ICommonTaskOptions} taskOptions
      *
-     * @deprecated
-     * @see AntiCaptcha.resolveRecaptchaV2()
-     */
-    public async resolveNoCaptcha<IGRecaptchaSolution>(websiteURL: string,
-                                                       websiteKey: string,
-                                                       proxy?: IProxyOptions,
-                                                       taskOptions?: ICommonTaskOptions
-    ): Promise<IGetTaskResultResponse<IGRecaptchaSolution>> {
-        return this.resolveRecaptchaV2<IGRecaptchaSolution>(websiteURL, websiteKey, false, proxy, taskOptions);
-    }
-
-    /**
-     * @param websiteURL
-     * @param websiteKey
-     * @param isInvisible
-     * @param proxy
-     * @param taskOptions
+     * @return Promise<IGetTaskResultResponse<IGRecaptchaSolution>>
      */
     public async resolveRecaptchaV2<IGRecaptchaSolution>(websiteURL: string,
                                                          websiteKey: string,
@@ -229,11 +228,37 @@ export default class AntiCaptcha {
     }
 
 
+    /**
+     * @param {string} websiteURL    - The URL where the captcha is defined.
+     * @param {string} websiteKey    - The value of the "data-site-key" attribute.
+     * @param {number} minScore      - One of 0.3, 0.7. 0.9
+     * @param {string} pageAction    - Recaptcha's "action" value. Website owners use this parameter to define what
+     *                                 users are doing on the page.
+     * @param {boolean} isEnterprise - Set this flag to "true" if you need this V3 solved with Enterprise API.
+     *                                 Default value is "false" and Recaptcha is solved with non-enterprise API.
+     * @param {string} apiDomain     - Use this parameter to send the domain name from which the Recaptcha script
+     *                                 should be served. Can have only one of two values: "www.google.com"
+     *                                 or "www.recaptcha.net". Do not use this parameter unless you understand what
+     *                                 you are doing.
+     * @param {ICommonTaskOptions} taskOptions
+     */
     public async resolveRecaptchaV3<IGRecaptchaSolution>(websiteURL: string,
                                                          websiteKey: string,
+                                                         minScore: number,
+                                                         pageAction?: string,
+                                                         isEnterprise: boolean = false,
+                                                         apiDomain?: string,
                                                          taskOptions?: IReCaptchaV3Options
     ): Promise<IGetTaskResultResponse<IGRecaptchaSolution>> {
-        const taskId = await this.reCaptchaV3Task(websiteURL, websiteKey, taskOptions);
+        const taskId = await this.reCaptchaV3Task(
+            websiteURL,
+            websiteKey,
+            minScore,
+            pageAction,
+            isEnterprise,
+            apiDomain,
+            taskOptions
+        );
 
         return this.getTaskResult<IGRecaptchaSolution>(taskId, 15, 2000);
     }
@@ -294,6 +319,7 @@ export default class AntiCaptcha {
 
     /**
      * @param debugData
+     * @protected
      */
     protected debugLog(...debugData: any[]) {
         if (this.debug) {

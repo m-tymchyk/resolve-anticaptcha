@@ -5,6 +5,8 @@ export enum TaskTypes {
     RECAPTCHA_V2_TASK_PROXYLESS = 'RecaptchaV2TaskProxyless',
     RECAPTCHA_V2_TASK = 'RecaptchaV2Task',
     RECAPTCHA_V3_TASK_PROXYLESS = 'RecaptchaV3TaskProxyless',
+    RECAPTCHA_V2_ENTERPRISE_TASK = 'RecaptchaV2EnterpriseTask',
+    RECAPTCHA_V2_ENTERPRISE_TASK_PROXYLESS = 'RecaptchaV2EnterpriseTaskProxyless',
     FUN_CAPTCHA = 'FunCaptchaTask',
     FUN_CAPTCHA_PROXYLESS = 'FunCaptchaTaskProxyless',
     SQUARE_NET_TEXT = 'SquareNetTextTask',
@@ -68,12 +70,9 @@ export interface IProxyOptions {
     proxyType: 'http' | 'socks4' | 'socks5';
     proxyAddress: string;
     proxyPort: number;
-
     proxyLogin?: string;
     proxyPassword?: string;
-
-    userAgent: string;
-
+    userAgent?: string;
     cookies?: string;
 }
 
@@ -86,13 +85,12 @@ export interface ICommonTask {
 
 
 export interface ICommonTaskOptions {
-    lang?: 'en' | 'rn';
+    lang?: 'en' | 'ru';
     callbackUrl?: string;
 }
 
 
 export interface IReCaptchaV3Options extends ICommonTaskOptions {
-    minScore?: number;
     pageAction?: string;
     isEnterprise?: boolean;
     apiDomain?: string;
